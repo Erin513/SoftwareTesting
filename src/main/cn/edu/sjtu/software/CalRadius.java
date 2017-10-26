@@ -22,6 +22,14 @@ class Circle {
         this.p = p;
         this.radius = radius;
     }
+
+    public boolean equals(Object o){
+        if(o instanceof Circle) {
+            final Circle c = (Circle) o;
+            return c.radius == radius && c.p.x == p.x && c.p.y == p.y;
+        }
+        return false;
+    };
 }
 
 public class CalRadius {
