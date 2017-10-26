@@ -1,4 +1,4 @@
-package com.test.homework;
+package cn.edu.sjtu.software;
 import java.lang.Math;
 import java.util.Scanner;
 
@@ -9,6 +9,16 @@ class Point{
 	{
 		x=x1;
 		y=y1;
+	}
+
+}
+class Circle{
+	Point p;
+	double radius;
+
+	public Circle(Point p, double radius) {
+		this.p = p;
+		this.radius = radius;
 	}
 }
 
