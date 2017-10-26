@@ -2,6 +2,7 @@ package com.test.homework;
 import java.lang.Math;
 import java.util.Scanner;
 
+
 class Point{
 	double x,y;
 	Point(double x1,double y1)
@@ -16,21 +17,18 @@ public class CalRadius {
 	/**
 	 * @param args
 	 */
+	public boolean equal(double num1,double num2){
+		if((num1-num2>-0.000001)&&(num1-num2)<0.000001) return true;
+		else return false;
+	}
+
 	
 	public boolean isCollinear(Point p1,Point p2,Point p3){
 		boolean boo=false;
 		double len12=Math.sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
 		double len13=Math.sqrt((p1.x-p3.x)*(p1.x-p3.x)+(p1.y-p3.y)*(p1.y-p3.y));
 		double len32=Math.sqrt((p3.x-p2.x)*(p3.x-p2.x)+(p3.y-p2.y)*(p3.y-p2.y));	
-		if(len12+len13==len32)
-		{
-			boo=true;
-		}
-		if(len12+len32==len13)
-		{
-			boo=true;
-		}
-		if(len32+len13==len12)
+		if(equal(len12,len13+len32)||equal(len13,len12+len32)||equal(len32,len13+len12))
 		{
 			boo=true;
 		}
@@ -68,6 +66,7 @@ public class CalRadius {
 	            f = (y2 - y3) / (x2 - x3);
 	            center.x = e - f * center.y;
 	        }
+	        
 	        System.out.println("外心为("+center.x+","+center.y+")");
 	        double x0=center.x,y0=center.y;
 	        double radius=Math.sqrt((x1-x0)*(x1-x0)+(y1-y0)*(y1-y0));;
@@ -80,13 +79,13 @@ public class CalRadius {
 		
 		Scanner scanner=new Scanner(System.in);
 		System.out.println("请输入坐标");	
-	        double a1,a2,a3,b1,b2,b3;
-	        a1=scanner.nextDouble();
-	        b1=scanner.nextDouble();
-	        a2=scanner.nextDouble();
-	        b2=scanner.nextDouble();
-	        a3=scanner.nextDouble();
-	        b3=scanner.nextDouble();
+	    double a1,a2,a3,b1,b2,b3;
+        a1=scanner.nextDouble();
+        b1=scanner.nextDouble();
+        a2=scanner.nextDouble();
+        b2=scanner.nextDouble();
+        a3=scanner.nextDouble();
+        b3=scanner.nextDouble();
 		Point p1=new Point(a1,b1);
 		Point p2=new Point(a2,b2);
 		Point p3=new Point(a3,b3);
