@@ -1,6 +1,6 @@
 package cn.edu.sjtu.software;
 
-public class solEquation {
+public class SolEquation {
 
     private int a = 1;
     private int b = 1;
@@ -45,7 +45,7 @@ public class solEquation {
     }
 
     public static boolean isSolvable(int a, int b, int c) {
-        solEquation equ = new solEquation(a,b,c);
+        SolEquation equ = new SolEquation(a,b,c);
         return equ.isSolvable;
     }
 
@@ -62,7 +62,7 @@ public class solEquation {
     }
 
     public static double[] rootRes(int a, int b, int c) {
-        solEquation equ = new solEquation(a,b,c);
+        SolEquation equ = new SolEquation(a,b,c);
         return equ.rootRes;
     }
 }
