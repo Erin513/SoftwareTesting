@@ -38,6 +38,5 @@ public class SolEquationTest {
         assertArrayEquals(results, t.rootRes(),2);
     }
 
-
 }
 
