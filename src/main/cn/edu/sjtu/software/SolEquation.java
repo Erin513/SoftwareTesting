@@ -39,7 +39,7 @@ public class SolEquation {
 
     public boolean isSolvable() {
         delta = b * b - 4 * a * c;
-        return delta < 0;
+        return delta >= 0;
     }
 
     public static boolean isSolvable(int a, int b, int c) {
@@ -57,6 +57,6 @@ public class SolEquation {
 
     public static double[] rootRes(int a, int b, int c) {
         SolEquation equ = new SolEquation(a,b,c);
-        return equ.rootRes;
+        return equ.rootRes();
     }
 }
