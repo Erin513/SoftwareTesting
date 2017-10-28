@@ -53,6 +53,9 @@ public class CalRadius {
         }
         return boo;
     }
+    public boolean isCollinearStub(Point p1, Point p2, Point p3) {
+        return true;
+    }
 
     public Circle calRadius(Point p1, Point p2, Point p3) {
         if (isCollinear(p1, p2, p3) == true) {
