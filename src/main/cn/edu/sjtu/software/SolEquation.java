@@ -1,3 +1,4 @@
+package cn.edu.sjtu.software;
 public class SolEquation {
 
     private int a = 1;
