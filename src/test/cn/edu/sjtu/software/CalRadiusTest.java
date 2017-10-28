@@ -39,9 +39,11 @@ public class CalRadiusTest {
         Point p1 = new Point(0,0);
         Point p2 = new Point(0,4);
         Point p3 = new Point(3,0);
-//        Point p4 = new Point(0,8);
+        Point p4 = new Point(0,8);
         assertEquals(new Circle(new Point(1.5,2),2.5),calRadius.calRadius(p1,p2,p3));
+        assertEquals(null,calRadius.calRadius(p4,p4,p4));
         assertEquals(new Circle(new Point(1.5,2),2.5),calRadius.calRadius(p1,p3,p2));
+        assertNotEquals(calRadius.calRadius(p1,p3,p2),15);
     }
 
 }
