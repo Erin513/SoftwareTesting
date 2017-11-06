@@ -1,64 +1,133 @@
 package cn.edu.sjtu.software;
 
-import java.lang.Math;
-import java.util.Scanner;
-
-
-class Point {
-    double x, y;
-
-    public Point(double x1, double y1) {
-        x = x1;
-        y = y1;
-    }
-
-}
-
-class Circle {
-    Point p;
-    double radius;
-
-    public Circle(Point p, double radius) {
-        this.p = p;
-        this.radius = radius;
-    }
-
-    public boolean equals(Object o){
-        if(o instanceof Circle) {
-            final Circle c = (Circle) o;
-            return c.radius == radius && c.p.x == p.x && c.p.y == p.y;
-        }
-        return false;
-    };
-}
-
 public class CalRadius {
 
+	/**
+	 * equal的桩函数
+	 * @param num1
+	 * @param num2
+	 * @return
+	 */
+	/*
+	public boolean equalStub(double num1, double num2){
+		
+		if(num1 == 4.0 && num2 == 12.0){
+			return false;
+		}
+		
+		if(num1 == 8.0 && num2 == 8.0){
+			return true;
+		}
+		
+		if(num1 == 4.0 && num2 == 8.0){
+			return false;
+		}
+		
+		if(num1 == 3.0 && num2 == 9.0){
+			return false;
+		}
+		
+		if(num1 == 5.0 && num2 == 7.0){
+			return false;
+		}
+		
+		if(num1 == 0.0 && num2 == 0.0){
+			return true;
+		}
+		
+		if(num1 == 3.0 && num2 == 3.0){
+			return true;
+		}
+		if(num1 == 3.0 && num2 == 3.0000001){
+			return true;
+		}
+		
+		if(num1 == 3.0 && num2 == 2.9999999){
+			return false;
+		}
+		
+		if(num1 == 4.0 && num2 == 3.0){
+			return false;
+		}
+		
+		if(num1 == 3.5 && num2 == 4.5){
+			return false;
+		}
+		
+		
+		return true;
+	}
+	*/
     /**
      * @param num1,num2
      */
     public boolean equal(double num1, double num2) {
-        if ((num1 - num2 > -0.000001) && (num1 - num2) < 0.000001) return true;
-        else return false;
+    	
+        if ((num1 - num2 > -0.000001) && (num1 - num2) < 0.000001) {
+        	return true;
+        }else {
+        	return false;
+        }
+        	
     }
 
-
-    public boolean isCollinear(Point p1, Point p2, Point p3) {
+    public boolean isCollinear(Point p1, Point p2, Point p3) throws Exception {
+    	
+    	if(p1==null || p2==null || p3==null){
+    		
+    		throw new Exception();//如果输入为空，抛出异常
+    	}
+    	
         boolean boo = false;
         double len12 = Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
         double len13 = Math.sqrt((p1.x - p3.x) * (p1.x - p3.x) + (p1.y - p3.y) * (p1.y - p3.y));
         double len32 = Math.sqrt((p3.x - p2.x) * (p3.x - p2.x) + (p3.y - p2.y) * (p3.y - p2.y));
+        
+        /**
+         * 此处使用了equal的转函数equalStub
+         */
         if (equal(len12, len13 + len32) || equal(len13, len12 + len32) || equal(len32, len13 + len12)) {
+        
+        //if (equalStub(len12, len13 + len32) || equalStub(len13, len12 + len32) || equalStub(len32, len13 + len12)) {
+        	
             boo = true;
         }
         return boo;
     }
+    /**
+     * isCollinear的桩函数
+     * @param p1
+     * @param p2
+     * @param p3
+     * @return
+     */
+    /*
     public boolean isCollinearStub(Point p1, Point p2, Point p3) {
-        return true;
+        
+    	if(p1.x==0.0 && p1.y==0.0 &&p2.x==0.0&&p2.y==4.0&&p3.x==0.0&&p3.y==8.0){
+    		return true;
+    	}
+    	
+    	if(p1.x==0.0 && p1.y==8.0 &&p2.x==0.0&&p2.y==8.0&&p3.x==0.0&&p3.y==8.0){
+    		return true;
+    	}
+    	
+    	if(p1.x==0.0 && p1.y==0.0 &&p2.x==0.0&&p2.y==4.0&&p3.x==3.0&&p3.y==0.0){
+    		return false;
+    	}
+    	
+    	if(p1.x==0.0 && p1.y==0.0 &&p2.x==3.0&&p2.y==0.0&&p3.x==0.0&&p3.y==4.0){
+    		return false;
+    	}
+    	
+    	return true;
     }
 
-    public Circle calRadius(Point p1, Point p2, Point p3) {
-        if (isCollinear(p1, p2, p3) == true) {
+  */
+    public Circle calRadius(Point p1, Point p2, Point p3) throws Exception {
+    	
+    	/** 对isCollinear函数进行打桩 */
+        if (isCollinear(p1, p2, p3)/* isCollinearStub(p1, p2, p3) */== true) {
             System.out.println("三点共线");
             return null;
         } else {
@@ -81,10 +150,6 @@ public class CalRadius {
                 e = (x1 * x1 + y1 * y1 - x3 * x3 - y3 * y3) / (2 * (x1 - x3));
                 f = (y1 - y3) / (x1 - x3);
                 center.x = e - f * center.y;
-            } else if (x2 != x3) {
-                e = (x2 * x2 + y2 * y2 - x3 * x3 - y3 * y3) / (2 * (x2 - x3));
-                f = (y2 - y3) / (x2 - x3);
-                center.x = e - f * center.y;
             }
 
             System.out.println("外心为(" + center.x + "," + center.y + ")");
@@ -96,7 +161,7 @@ public class CalRadius {
         }
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) throws Exception {
         // TODO Auto-generated method stub
 
         Scanner scanner = new Scanner(System.in);
@@ -115,6 +180,6 @@ public class CalRadius {
 
         t.calRadius(p1, p2, p3);
 
-    }
+    }*/
 
 }
