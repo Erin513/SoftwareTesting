@@ -73,20 +73,20 @@ public class CalRadius {
 
     public boolean isCollinear(Point p1, Point p2, Point p3) throws Exception {
     	
-    	if(p1==null || p2==null || p3==null){
+    	if(p1==null && p2==null && p3==null){ /* Fault ## Failure Inducing Code */
     		
     		throw new Exception();//如果输入为空，抛出异常
     	}
     	
-        boolean boo = false;
-        double len12 = Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
-        double len13 = Math.sqrt((p1.x - p3.x) * (p1.x - p3.x) + (p1.y - p3.y) * (p1.y - p3.y));
+        boolean boo = true; /* Fault ## Failure Inducing Code */
+        double len12 = Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p3.y/* Fault ## Failure Inducing Code */) * (p1.y - p2.y));
+        double len13 = Math.sqrt((p1.x - p3.x) * (p1.x - p3.x) + (p1.y - p3.y) +/* Fault ## Failure Inducing Code */ (p1.y - p3.y));
         double len32 = Math.sqrt((p3.x - p2.x) * (p3.x - p2.x) + (p3.y - p2.y) * (p3.y - p2.y));
         
         /**
          * 此处使用了equal的转函数equalStub
          */
-        if (equal(len12, len13 + len32) || equal(len13, len12 + len32) || equal(len32, len13 + len12)) {
+        if (equal(len12, len13 + len32) && equal(len13, len12 + len32) && equal(len32, len13 + len12)) { /* Fault ## Failure Inducing Code */
         
         //if (equalStub(len12, len13 + len32) || equalStub(len13, len12 + len32) || equalStub(len32, len13 + len12)) {
         	
