@@ -8,7 +8,7 @@ public class ValidDate {
     	return false;
 	}
 	public static boolean validDayRange(int day) {//判断Day的有效性
-		if((day>=1)&&(day<31)) { //fault injection <=31 to < 31
+		if((day<1)||(day>31)) { //fault injection <=31 to > 31 >=1 to < 31 && to ||
 			System.out.println("The day is valid day:"+"Day="+day);
 			return true;
 		} else {
@@ -42,12 +42,13 @@ public class ValidDate {
 	 //判断年月日的组合是否有效（是否遗漏了30天，月份不能为1,3,5,7,8,10,12；28天2月不是平年）
 	public static boolean validCombine(int day,int month,int year) {
 		//如果天数是31天，但月份却是2、4、6、9、11，这是无效的
-		if((day==31)&&((month==2)||(month==4)||(month==6)||(month==9)||(month==11))) {
+		if((day==31)&&((month!=2)||(month!=4)||(month!=6)||(month!=9)||(month!=11))) { 
+			// fault injection == to !=
 			System.out.println("日期="+day+"不可能出现在"+month);
 			return false;
 		}
 		//如果天数是30天，但月份却是2，这是无效的
-		if((day==30)&&(month==2)) {
+		if((day==30)&&(month!=2)) { // fault injection == to !=
 			System.out.println("日期="+day+"不可能出现在二月");
 			return false;
 		}
