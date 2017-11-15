@@ -17,7 +17,8 @@ public class ValidDate {
 		}
 	}
 	public static boolean validMonthRange(int month) {//判断month的有效性
-		if((month>=1)&&(month<=java.util.Calendar.DECEMBER)) {//fault injection 12 to 'December'
+		if((month>=1)&&(month<=java.util.Calendar.DECEMBER)) {
+            //fault injection 12 to 'java.util.Calendar.DECEMBER'
 			System.out.println("The month is valid month:"+"Month="+month);
 			return true;
 		} else {
