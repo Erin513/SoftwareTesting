@@ -17,7 +17,7 @@ public class ValidDate {
 		}
 	}
 	public static boolean validMonthRange(int month) {//判断month的有效性
-		if((month>=1)&&(month<='December')) {//fault injection 12 to 'December'
+		if((month>=1)&&(month<=java.util.Calendar.DECEMBER)) {//fault injection 12 to 'December'
 			System.out.println("The month is valid month:"+"Month="+month);
 			return true;
 		} else {
@@ -43,7 +43,7 @@ public class ValidDate {
 	public static boolean validCombine(int day,int month,int year) {
 		//如果天数是31天，但月份却是2、4、6、9、11，这是无效的
 		if((day==31)&&((month!=2)||(month!=4)||(month!=6)||(month!=9)||(month!=11))) { 
-			// fault injection == to !=
+			// FAULT## FAILURE INDUCING CODE  == to !=
 			System.out.println("日期="+day+"不可能出现在"+month);
 			return false;
 		}
