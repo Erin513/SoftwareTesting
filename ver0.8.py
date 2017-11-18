@@ -6,6 +6,18 @@ import sys
 import os
 import re
 
+
+#获得文件路径
+def GetPath():
+	pathprefix = os.getcwd()
+	if sys.platform == 'win32':
+		pathsuffix = r'\src\main\cn\edu\sjtu\software'
+		pathjoin = '\\'
+	else:
+		pathsuffix = '/src/main/cn/edu/sjtu/software'
+		pathjoin = '/'
+	return pathprefix + pathsuffix + pathjoin
+
 #筛选java文件
 def IsSubString(SubStrList, Str):
 
@@ -16,8 +28,10 @@ def IsSubString(SubStrList, Str):
 
 	return flag
 
+#美化格式
 def PrintStar():
 	print('*' * 20)
+
 #列出java文件
 def ListFile(FindPath, FlagStr):
 	FileList = []
@@ -36,10 +50,31 @@ def ListFile(FindPath, FlagStr):
 
 	return FileList
 
+#选择类文件
+def ChooseClass(FileNames):
+	PrintStar()
+	for idx, val in enumerate(FileNames,start=1):
+		print(idx, val)
+	PrintStar()
+
+#备份源文件
 def Backupfile(Path, Origin):
 	with open(Path + '.backup', 'w', encoding = 'utf-8') as f:
 		f.write(Origin)
 	return
+
+#选择方法
+def ChooseMethod(ClassFile):
+	tree = javalang.parse.parse(classfile)
+
+	method = []
+	for path, node in tree.filter(javalang.tree.MethodDeclaration):
+		method.append(node.name)
+	PrintStar()
+	for idx, val in enumerate(method,start=1):
+		print(idx, val,'()')
+	PrintStar()
+	return method
 
 #分割方法
 def SplitMethod(ClassFile, MethodName):
@@ -67,7 +102,32 @@ def SplitMethod(ClassFile, MethodName):
 	#print(postion)
 	return postion
 
+#选择错误注入
+def FaultInjection(Method):
+	selectfault = ['完成注入','Return错误','2','3','4','5']
+	for idx, val in enumerate(selectfault):
+		print(idx, val,)
+	while 1:
+		selnum3 = int(input("请选择需要的错误类型:"))
+		if selnum3 == 1:
+			Method = ReturnFaultInjection(Method)
+			PrintStar()
+			print(Method)
+			PrintStar()
+		elif selnum3 == 2:
+			pass
+		elif selnum3 == 3:
+			pass
+		elif selnum3 == 4:
+			pass
+		elif selnum3 == 5:
+			pass
+		else:
+			break
+	return Method
 
+
+#Return错误注入
 def ReturnFaultInjection(Method):
 	if(Method.find('return false') != -1 or Method.find('return true') != -1):
 		Method = Method.replace('return false', '###')
@@ -80,11 +140,13 @@ def ReturnFaultInjection(Method):
 
 	return Method
 
+#保存文件
 def Writetofile(Path, Injected):
 	with open(Path, 'w', encoding = 'utf-8') as f:
 		f.write(Injected)
 	return 1
 
+#比较文件变化
 def CompareFile(Path1,Path2):
 	PrintStar()
 	with open(Path1,'r',encoding='utf-8') as f1, open(Path2,'r',encoding='utf-8') as f2:
@@ -94,35 +156,18 @@ def CompareFile(Path1,Path2):
 	PrintStar()
 
 if __name__ == '__main__':
-	pathprefix = os.getcwd()
-	if sys.platform == 'win32':
-		pathsuffix = r'\src\main\cn\edu\sjtu\software'
-		pathjoin = '\\'
-	else:
-		pathsuffix = '/src/main/cn/edu/sjtu/software'
-		pathjoin = '/'
-	path = pathprefix + pathsuffix
+	path = GetPath()
 	file_name = ListFile(path,'java')
-	PrintStar()
-	for idx, val in enumerate(file_name,start=1):
-		print(idx, val)
-	PrintStar()
+
+	ChooseClass(file_name)
 	selnum1 = int(input("请选择需要的类文件:"))
 
-	path_abs = path+ pathjoin + file_name[selnum1 - 1]
+	path_abs = path + file_name[selnum1 - 1]
 	with open(path_abs,'r',encoding='utf-8') as f:
 		classfile = f.read()
 	Backupfile(path_abs, classfile)
-	tree = javalang.parse.parse(classfile)
+	method = ChooseMethod(classfile)
 
-
-	method = []
-	for path, node in tree.filter(javalang.tree.MethodDeclaration):
-		method.append(node.name)
-	PrintStar()
-	for idx, val in enumerate(method,start=1):
-		print(idx, val,'()')
-	PrintStar()
 
 	selnum2 = int(input("请选择需要的方法:"))
 	methodpos = SplitMethod(classfile, method[selnum2 - 1]) #选择方法的位置
@@ -132,26 +177,8 @@ if __name__ == '__main__':
 	print(methodtxt)
 	PrintStar()
 
-	selectfault = ['完成注入','Return错误','2','3','4','5']
-	for idx, val in enumerate(selectfault):
-		print(idx, val,)
-	while 1:
-		selnum3 = int(input("请选择需要的错误类型:"))
-		if selnum3 == 1:
-			methodtxt = ReturnFaultInjection(methodtxt)
-			PrintStar()
-			print(methodtxt)
-			PrintStar()
-		elif selnum3 == 2:
-			pass
-		elif selnum3 == 3:
-			pass
-		elif selnum3 == 4:
-			pass
-		elif selnum3 == 5:
-			pass
-		else:
-			break
+	methodtxt = FaultInjection(methodtxt)
+
 
 	classfile = classfile[:methodpos[0]] + methodtxt + classfile[methodpos[1]:]
 	if(input("需要展示注入后的代码吗？y/n:") == 'y'):
