@@ -61,10 +61,27 @@ def SplitMethod(ClassFile, MethodName):
 	return postion
 
 
+def ReturnFaultInjection(Method):
+	if(Method.find('return false') != -1 or Method.find('return true') != -1):
+		Method = Method.replace('return false', '###')
+		Method = Method.replace('return true', '***')
+	else:
+		return -1
+
+	Method = Method.replace('###', 'return true')
+	Method = Method.replace('***', 'return false')
+
+	return Method
+
 
 if __name__ == '__main__':
 	pathprefix = os.getcwd()
-	pathsuffix = r'\src\main\cn\edu\sjtu\software'
+	if sys.platform == 'win32':
+		pathsuffix = r'\src\main\cn\edu\sjtu\software'
+		pathjoin = '\\'
+	else:
+		pathsuffix = '/src/main/cn/edu/sjtu/software'
+		pathjoin = '/'
 	path = pathprefix + pathsuffix
 	file_name = ListFile(path,'java')
 
@@ -72,7 +89,8 @@ if __name__ == '__main__':
 		print(idx, val)
 	selnum1 = int(input("请选择需要的类文件:"))
 
-	with open(path+ '\\' + file_name[selnum1 - 1],'r',encoding='utf-8') as f:
+
+	with open(path+ pathjoin + file_name[selnum1 - 1],'r',encoding='utf-8') as f:
 		classfile = f.read()
 	tree = javalang.parse.parse(classfile)
 
@@ -86,4 +104,28 @@ if __name__ == '__main__':
 
 	selnum2 = int(input("请选择需要的方法:"))
 	methodpos = SplitMethod(classfile, method[selnum2 - 1]) #选择方法的位置
-	print(classfile[methodpos[0]:methodpos[1]])
+
+	methodtxt = classfile[methodpos[0]:methodpos[1]]
+	print(methodtxt)
+
+	selectfault = ['Return错误','2','3','4','5']
+	for idx, val in enumerate(selectfault,start=1):
+		print(idx, val,)
+	while 1:
+		selnum3 = int(input("请选择需要的错误类型:"))
+		if selnum3 == 1:
+			methodtxt = ReturnFaultInjection(methodtxt)
+			print(methodtxt)
+		elif selnum3 == 2:
+			pass
+		elif selnum3 == 3:
+			pass
+		elif selnum3 == 4:
+			pass
+		elif selnum3 == 5:
+			pass
+		else:
+			break
+
+	classfile = classfile[:methodpos[0] - 1] + methodtxt + classfile[methodpos[1] + 1:]
+	print(classfile)
