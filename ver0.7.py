@@ -16,6 +16,8 @@ def IsSubString(SubStrList, Str):
 
 	return flag
 
+def PrintStar():
+	print('*' * 20)
 #列出java文件
 def ListFile(FindPath, FlagStr):
 	FileList = []
@@ -33,6 +35,11 @@ def ListFile(FindPath, FlagStr):
 		FileList.sort()
 
 	return FileList
+
+def Backupfile(Path, Origin):
+	with open(Path + '.backup', 'w', encoding = 'utf-8') as f:
+		f.write(Origin)
+	return
 
 #分割方法
 def SplitMethod(ClassFile, MethodName):
@@ -73,6 +80,18 @@ def ReturnFaultInjection(Method):
 
 	return Method
 
+def Writetofile(Path, Injected):
+	with open(Path, 'w', encoding = 'utf-8') as f:
+		f.write(Injected)
+	return 1
+
+def CompareFile(Path1,Path2):
+	PrintStar()
+	with open(Path1,'r',encoding='utf-8') as f1, open(Path2,'r',encoding='utf-8') as f2:
+		for line_no, (line1, line2) in enumerate(zip(f1, f2)):
+			if line1 != line2:
+				print('line ' + str(line_no) + '\t' + line1.strip() + ' change to ' + line2.strip())
+	PrintStar()
 
 if __name__ == '__main__':
 	pathprefix = os.getcwd()
@@ -84,38 +103,45 @@ if __name__ == '__main__':
 		pathjoin = '/'
 	path = pathprefix + pathsuffix
 	file_name = ListFile(path,'java')
-
+	PrintStar()
 	for idx, val in enumerate(file_name,start=1):
 		print(idx, val)
+	PrintStar()
 	selnum1 = int(input("请选择需要的类文件:"))
 
-
-	with open(path+ pathjoin + file_name[selnum1 - 1],'r',encoding='utf-8') as f:
+	path_abs = path+ pathjoin + file_name[selnum1 - 1]
+	with open(path_abs,'r',encoding='utf-8') as f:
 		classfile = f.read()
+	Backupfile(path_abs, classfile)
 	tree = javalang.parse.parse(classfile)
 
 
 	method = []
 	for path, node in tree.filter(javalang.tree.MethodDeclaration):
 		method.append(node.name)
-
+	PrintStar()
 	for idx, val in enumerate(method,start=1):
 		print(idx, val,'()')
+	PrintStar()
 
 	selnum2 = int(input("请选择需要的方法:"))
 	methodpos = SplitMethod(classfile, method[selnum2 - 1]) #选择方法的位置
 
 	methodtxt = classfile[methodpos[0]:methodpos[1]]
+	PrintStar()
 	print(methodtxt)
+	PrintStar()
 
-	selectfault = ['Return错误','2','3','4','5']
-	for idx, val in enumerate(selectfault,start=1):
+	selectfault = ['完成注入','Return错误','2','3','4','5']
+	for idx, val in enumerate(selectfault):
 		print(idx, val,)
 	while 1:
 		selnum3 = int(input("请选择需要的错误类型:"))
 		if selnum3 == 1:
 			methodtxt = ReturnFaultInjection(methodtxt)
+			PrintStar()
 			print(methodtxt)
+			PrintStar()
 		elif selnum3 == 2:
 			pass
 		elif selnum3 == 3:
@@ -127,5 +153,15 @@ if __name__ == '__main__':
 		else:
 			break
 
-	classfile = classfile[:methodpos[0] - 1] + methodtxt + classfile[methodpos[1] + 1:]
-	print(classfile)
+	classfile = classfile[:methodpos[0]] + methodtxt + classfile[methodpos[1]:]
+	if(input("需要展示注入后的代码吗？y/n:") == 'y'):
+		PrintStar()
+		print(classfile)
+		PrintStar()
+
+	if(Writetofile(path_abs, classfile) == 1):
+		PrintStar()
+		print('注入完成！')
+		PrintStar()
+
+	CompareFile(path_abs + '.backup', path_abs)
