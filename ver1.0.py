@@ -212,8 +212,8 @@ def OperatorFaultInjection(Method):
 	if(Method.find('%') != -1 or Method.find('-') != -1 or Method.find('*') != -1 or Method.find('/') != -1):
 		Method = Method.replace('%', '###')
 		Method = Method.replace('-', '%%%')
-		Method = Method.replace('*', '@@@')
-		Method = Method.replace('/', '$$$')
+		Method = Method.replace(' * ', '@@@')
+		Method = Method.replace(' / ', '$$$')
 		#Method = Method.replace('==', '%%%')
 		#Method = Method.replace('!=', '^^^')
 	else:
@@ -221,8 +221,8 @@ def OperatorFaultInjection(Method):
 
 	Method = Method.replace('###', '/')
 	Method = Method.replace('%%%', '+')
-	Method = Method.replace('@@@', '-')
-	Method = Method.replace('$$$', '%')
+	Method = Method.replace('@@@', ' - ')
+	Method = Method.replace('$$$', ' % ')
 	#Method = Method.replace('%%%', '!=')
 	#Method = Method.replace('^^^', '==')
 	return Method
