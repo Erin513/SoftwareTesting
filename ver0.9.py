@@ -5,6 +5,7 @@ import javalang #可以在https://github.com/c2nes/javalang得到
 import sys
 import os
 import re
+import random
 
 
 #获得文件路径
@@ -104,24 +105,52 @@ def SplitMethod(ClassFile, MethodName):
 
 #选择错误注入
 def FaultInjection(Method):
-	selectfault = ['完成注入','Return错误','2','3','4','5']
+	selectfault = ['完成注入','Return语句替换','逻辑符号替换','关系符替换','常数替换','运算符号替换']
 	for idx, val in enumerate(selectfault):
 		print(idx, val,)
 	while 1:
 		selnum3 = int(input("请选择需要的错误类型:"))
 		if selnum3 == 1:
-			Method = ReturnFaultInjection(Method)
+			tmp = ReturnFaultInjection(Method)
+			if(tmp != -1):
+				Method = tmp
+				PrintStar()
+				print(Method)
+				PrintStar()
+			else:
+				print('没有Return语句，请重选')
+		elif selnum3 == 2:
+			tmp = LogicalFaultInjection(Method)
+			if(tmp != -1):
+				Method = tmp
+				PrintStar()
+				print(Method)
+				PrintStar()
+			else:
+				print('没有逻辑判断语句，请重选')
+		elif selnum3 == 3:
+			tmp = RelationalFaultInjection(Method)
+			if(tmp != -1):
+				Method = tmp
+				PrintStar()
+				print(Method)
+				PrintStar()
+			else:
+				print('没有关系判断语句，请重选')
+		elif selnum3 == 4:
+			Method = ConstantFaultInjection(Method)
 			PrintStar()
 			print(Method)
 			PrintStar()
-		elif selnum3 == 2:
-			pass
-		elif selnum3 == 3:
-			pass
-		elif selnum3 == 4:
-			pass
 		elif selnum3 == 5:
-			pass
+			tmp = OperatorFaultInjection(Method)
+			if(tmp != -1):
+				Method = tmp
+				PrintStar()
+				print(Method)
+				PrintStar()
+			else:
+				print('没有运算符号，请重选')
 		else:
 			break
 	return Method
@@ -140,6 +169,63 @@ def ReturnFaultInjection(Method):
 
 	return Method
 
+def LogicalFaultInjection(Method):
+	if(Method.find('&&') != -1 or Method.find('||') != -1):
+		Method = Method.replace('&&', '###')
+		Method = Method.replace('||', '***')
+	else:
+		return -1
+
+	Method = Method.replace('###', '||')
+	Method = Method.replace('***', '&&')
+
+	return Method
+
+def RelationalFaultInjection(Method):
+	if(Method.find('>') != -1 or Method.find('>=') != -1 or Method.find('<') != -1 or Method.find('<=') != -1 or Method.find('==') != -1 or Method.find('!=') != -1):
+		Method = Method.replace('>', '###')
+		Method = Method.replace('>=', '***')
+		Method = Method.replace('<', '@@@')
+		Method = Method.replace('<=', '$$$')
+		Method = Method.replace('==', '%%%')
+		Method = Method.replace('!=', '^^^')
+	else:
+		return -1
+
+	Method = Method.replace('###', '>=')
+	Method = Method.replace('***', '>')
+	Method = Method.replace('@@@', '<=')
+	Method = Method.replace('$$$', '<')
+	Method = Method.replace('%%%', '!=')
+	Method = Method.replace('^^^', '==')
+	return Method
+
+def ConstantFaultInjection(Method):
+	tmp = ''
+	for c in Method:
+		c = re.sub(r'\d',str(random.randrange(10)),c)
+		tmp += c
+	Method = tmp
+	return Method
+
+def OperatorFaultInjection(Method):
+	if(Method.find('%') != -1 or Method.find('-') != -1 or Method.find('*') != -1 or Method.find('/') != -1):
+		Method = Method.replace('%', '###')
+		Method = Method.replace('-', '%%%')
+		Method = Method.replace('*', '@@@')
+		Method = Method.replace('/', '$$$')
+		#Method = Method.replace('==', '%%%')
+		#Method = Method.replace('!=', '^^^')
+	else:
+		return -1
+
+	Method = Method.replace('###', '/')
+	Method = Method.replace('%%%', '+')
+	Method = Method.replace('@@@', '-')
+	Method = Method.replace('$$$', '%')
+	#Method = Method.replace('%%%', '!=')
+	#Method = Method.replace('^^^', '==')
+	return Method
 #保存文件
 def Writetofile(Path, Injected):
 	with open(Path, 'w', encoding = 'utf-8') as f:
