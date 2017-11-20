@@ -1,6 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+
+__author__  = "Yun Wang"
+__version__ = "1.0"
+
+
 import javalang #可以在https://github.com/c2nes/javalang得到
 import sys
 import os
