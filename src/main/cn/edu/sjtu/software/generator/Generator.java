@@ -1,18 +1,18 @@
 package cn.edu.sjtu.software.generator;
 
 // Require Apache POI
+import cn.edu.sjtu.software.GenTest;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Generator {
 
@@ -52,7 +52,14 @@ public class Generator {
 //        Result r3 = g.runTests();
 //        g.generateResultFile(r);
         List<Failure> failures = r1.getFailures();
-
+        Map<String,Result> resultMap = new HashMap<String,Result>();
+        resultMap.put("actual",r1);
+        resultMap.put("mutate",r1);
+        /*
+        Stub,
+        Need to generate real mutation test results.
+         */
+        g.generateResultFile(resultMap);
     }
     //Also set class attributes;
 
@@ -85,23 +92,54 @@ public class Generator {
     }
 
     public void generateResultFile(Map<String,Result> resultMap) throws IOException{
-        File f = new File("result.xlsx");
-        f.createNewFile();
-        Workbook wb = new XSSFWorkbook("result.xlsx");
-        Sheet sheet = wb.getSheetAt(0);
-        sheet.getRow(0).getCell(0).setCellValue(this.function);
-        int rowCur = 1;
-        for(int i = 0;i<testCases.length;i++){
+        XSSFWorkbook wb = new XSSFWorkbook();
 
+        String sheetName = "Sheet1";//name of sheet
+
+        XSSFSheet sheet = wb.createSheet(sheetName) ;
+        Row head = sheet.createRow(0);
+        head.createCell(0).setCellValue(function);
+        Row params = sheet.createRow(1);
+        params.createCell(0).setCellValue("Params");
+        for(int i = 1;i<=numOfParams;i++) {
+            params.createCell(i).setCellValue("Params"+i);
         }
+        int rowCur = 2;
+        for(int i = 0;i<numOfCases;i++) {
+            Row input = sheet.createRow(rowCur++);
+            input.createCell(0).setCellValue("Input");
+            for(int j = 1;j<=numOfParams;j++) {
+                input.createCell(j).setCellValue(testCases[i].params[j-1]);
+            }
+            sheet.createRow(rowCur++).createCell(0).setCellValue("Output");
+            for(Map.Entry<String, Result> entry: resultMap.entrySet()){
+                String key = entry.getKey();
+                Row output = sheet.createRow(rowCur++);
+                output.createCell(0).setCellValue(key);
+                Result result = entry.getValue();
+                String actual = testCases[i].expected;
+                for(Failure failure: result.getFailures()){
+                    if(failure.getTestHeader().contains(testCases[i].name)){
+                        System.out.println("detected:"+failure+testCases[i].name);
+                        actual = failure.getMessage().replaceAll("expected:(.*)but was:","");
+                    }
+                }
+                output.createCell(1).setCellValue(actual);
+            }
+        }
+
+        FileOutputStream fileOut = new FileOutputStream("result.xlsx");
+        wb.write(fileOut);
+        fileOut.flush();
+        fileOut.close();
 
     }
 
 
     public Result runTests() {
         JUnitCore core = new JUnitCore();
-//        Result r = core.run(GenTest.class);
-        Result r = null;
+        Result r = core.run(GenTest.class);
+//        Result r = null;
         return r;
     }
 
