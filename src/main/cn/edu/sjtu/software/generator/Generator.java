@@ -54,7 +54,10 @@ public class Generator {
         List<Failure> failures = r1.getFailures();
         Map<String,Result> resultMap = new HashMap<String,Result>();
         resultMap.put("actual",r1);
-        resultMap.put("mutate",r1);
+        resultMap.put("mutate1",r1);
+        resultMap.put("mutate2",r1);
+        resultMap.put("mutate3",r1);
+        resultMap.put("mutate4",r1);
         /*
         Stub,
         Need to generate real mutation test results.
