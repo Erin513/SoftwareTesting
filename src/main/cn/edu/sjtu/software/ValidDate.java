@@ -3,12 +3,12 @@ package cn.edu.sjtu.software;
 public class ValidDate {
 	public static boolean isLeap(int year) {//判断是否为闰年
 	if (((year % 4 ==0) && (year % 100 != 0)) || (year % 400 ==0))
-    	return false; //fault injection true to false
+    	return true; 
 	else 
     	return false;
 	}
 	public static boolean validDayRange(int day) {//判断Day的有效性
-		if((day<1)||(day>31)) { //fault injection <=31 to > 31 >=1 to < 31 && to ||
+		if((day>=1)&&(day<=31)) {
 			System.out.println("The day is valid day:"+"Day="+day);
 			return true;
 		} else {
@@ -17,8 +17,7 @@ public class ValidDate {
 		}
 	}
 	public static boolean validMonthRange(int month) {//判断month的有效性
-		if((month>=1)&&(month<=java.util.Calendar.DECEMBER)) {
-            //fault injection 12 to 'java.util.Calendar.DECEMBER'
+		if((month>=1)&&(month<=12)) {
 			System.out.println("The month is valid month:"+"Month="+month);
 			return true;
 		} else {
@@ -30,7 +29,7 @@ public class ValidDate {
 		
 	}
 	public static boolean validYearRange(int year) {//判断year的有效性
-		if((year>=1500)||(year<=2050)) { // fault injection && to ||
+		if((year>=1500)&&(year<=2050)) {
 			System.out.println("The year is valid year:"+"Year="+year);
 			return true;
 		} else {
@@ -54,7 +53,7 @@ public class ValidDate {
 			return false;
 		}
 		//如果天数是29天，月份却是2，却不是闰年，这是无效的
-		if((day==29)&&(month==3)&&(!isLeap(year))) { // fault injection month==2 to month==3
+		if((day==29)&&(month==2)&&(!isLeap(year))) {
 			System.out.println("日期="+day+"不可能出现在二月");
 			return false;
 		}
@@ -253,7 +252,7 @@ public class ValidDate {
 	public static boolean validate(int day,int month,int year) {
 		
 		if(!validDayRange(day)) return false;
-		if(validMonthRange(month)) return false; //fault injection remove !
+		if(!validMonthRange(month)) return false;
 		if(!validYearRange(year)) return false;
 		if(!validCombine(day,month,year)) return false;
 		return true;
