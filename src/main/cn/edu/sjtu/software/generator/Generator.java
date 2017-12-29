@@ -43,10 +43,12 @@ public class Generator {
         }
     }
 
+
     public static void main(String[] args) throws IOException{
         Generator g = new Generator();
         g.readXLSFile("test.xlsx");
-        g.generateJavaTest();
+        g.generateJavaTest("CalRadius");
+
         Result r1 = g.runTests();
 //        Result r2 = g.runTests();
 //        Result r3 = g.runTests();
@@ -54,14 +56,26 @@ public class Generator {
         List<Failure> failures = r1.getFailures();
         Map<String,Result> resultMap = new HashMap<String,Result>();
         resultMap.put("actual",r1);
-        resultMap.put("mutate1",r1);
-        resultMap.put("mutate2",r1);
-        resultMap.put("mutate3",r1);
-        resultMap.put("mutate4",r1);
+
+        String mutationPath = "src/main/cn/edu/sjtu/software/mutation/";
+        File mutation1 = new File(mutationPath+"CalRadius.java.opr.mut");
+        String destPath = "src/main/cn/edu/sjtu/software/CalRadius.java";
+        File dest = new File(destPath);
+        mutation1.renameTo(dest);
+
+        Result r2 = g.runTests();
+        failures = r2.getFailures();
+
+//        resultMap.put("mutate1",r2);
+//        resultMap.put("mutate2",r1);
+
         /*
         Stub,
         Need to generate real mutation test results.
          */
+
+        File ori = new File(mutationPath+"CalRadius.java.ori");
+        ori.renameTo(dest);
         g.generateResultFile(resultMap);
     }
     //Also set class attributes;
@@ -78,10 +92,11 @@ public class Generator {
 
         this.function = sheet.getRow(0).getCell(0).getStringCellValue();
         this.numOfParams = 0;
-        for(int i = 1;i<numOfCases;i++){
+        for(int i = 1;i<200;i++){
             if(sheet.getRow(i).getCell(0).getStringCellValue().equals("return")) break;
             else numOfParams++;
         } // Params
+        System.out.println(numOfParams);
 
         for(int i = 0;i<numOfCases;i++) {
             String expectedValue = sheet.getRow(numOfParams + 1).getCell(i + 1).getStringCellValue();
@@ -150,10 +165,10 @@ public class Generator {
      * Must be called after readXLSFile
      * @throws IOException
      */
-    public void generateJavaTest() throws IOException {
+    public void generateJavaTest(String testClassName) throws IOException {
         String dir = "src/main/cn/edu/sjtu/software/";
         String filename = "GenTest";
-        String testClassName = "CalRadius";
+//        String testClassName = "CalRadius";
         String member = "calRadius";
         String exname = ".java";
         File f = new File(dir + filename + exname);
@@ -173,7 +188,7 @@ public class Generator {
         for(int i = 0;i<numOfCases;i++){
             String expectedValue = testCases[i].expected;
 
-            fw.write("@Test public void test"+ (i+1) +"(){\n");
+            fw.write("@Test public void test"+ (i+1) +"() throws Exception{\n");
             fw.write("assertEquals(" + expectedValue + ",");
             fw.write(member+"."+function + "(");
             for(int j = 0;j<numOfParams;j++) {
