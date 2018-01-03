@@ -1,26 +1,42 @@
 package cn.edu.sjtu.software.generator;
 
 // Require Apache POI
+
 import cn.edu.sjtu.software.GenTest;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
+import javax.tools.*;
 import java.io.*;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import java.util.*;
 
-public class Generator {
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
+public class Generator{
+    URLClassLoader classLoader = new URLClassLoader(new URL[]{new File("./").toURI().toURL()});
 
     String function = "default";
     int numOfCases = 0;
     int numOfParams = 0;
     ArrayList<String> params = new ArrayList<String>();
     TestCase[] testCases;
+
+    public Generator() throws MalformedURLException {
+    }
 
     class TestCase {
         String name;
@@ -44,39 +60,59 @@ public class Generator {
     }
 
 
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws Exception{
         Generator g = new Generator();
-        g.readXLSFile("test.xlsx");
-        g.generateJavaTest("CalRadius");
+        g.go();
+    }
 
-        Result r1 = g.runTests();
-//        Result r2 = g.runTests();
-//        Result r3 = g.runTests();
-//        g.generateResultFile(r);
+    public void go() throws Exception{
+        readXLSFile("test.xlsx");
+        generateJavaTest("CalRadius");
+
+        Result r1 = runTests(GenTest.class);
         List<Failure> failures = r1.getFailures();
         Map<String,Result> resultMap = new HashMap<String,Result>();
         resultMap.put("actual",r1);
 
+        String destPathStr = "src/main/cn/edu/sjtu/software/CalRadius.java";
+        File dest = new File(destPathStr);
+        Path destPath = dest.toPath();
+
         String mutationPath = "src/main/cn/edu/sjtu/software/mutation/";
-        File mutation1 = new File(mutationPath+"CalRadius.java.opr.mut");
-        String destPath = "src/main/cn/edu/sjtu/software/CalRadius.java";
-        File dest = new File(destPath);
-        mutation1.renameTo(dest);
 
-        Result r2 = g.runTests();
-        failures = r2.getFailures();
+        String[] muts = {"opr.mut","ret.mut","rel.mut","log.mut"};
+        for(String mut: muts){
+            File mutationFile = new File(mutationPath+"CalRadius.java."+mut);
+            Path mutPath = mutationFile.toPath();
+            Files.copy(mutPath,destPath, REPLACE_EXISTING);
+            System.out.println("Testing "+mut);
+            String calRadius = "src/main/cn/edu/sjtu/software/CalRadius.java";
+            String gentest = "src/main/cn/edu/sjtu/software/GenTest.java";
+            String circle = "src/main/cn/edu/sjtu/software/Circle.java";
+            String point = "src/main/cn/edu/sjtu/software/Point.java";
+            Class testclass = recompile(calRadius, gentest, circle, point);
+            Result r = runTests(testclass);
+            resultMap.put(mut, r);
+        }
 
-//        resultMap.put("mutate1",r2);
-//        resultMap.put("mutate2",r1);
-
-        /*
-        Stub,
-        Need to generate real mutation test results.
-         */
+//        File mutation1 = new File(mutationPath+"CalRadius.java.opr.mut");
+//        Path mutation1Path = mutation1.toPath();
+//        Files.copy(mutation1Path, destPath, REPLACE_EXISTING);
+//        Result r2 = g.runTests();
+//        resultMap.put("opr.mut",r2);
+//
+//        File mutation2 = new File(mutationPath+"CalRadius.java.ret.mut");
+//        Path mutation2Path = mutation2.toPath();
+//        Files.copy(mutation2Path, destPath, REPLACE_EXISTING);
+//        Result r3 = g.runTests();
+//        resultMap.put("ret.mut",r3);
 
         File ori = new File(mutationPath+"CalRadius.java.ori");
-        ori.renameTo(dest);
-        g.generateResultFile(resultMap);
+        Path oriPath = ori.toPath();
+        Files.copy(oriPath, destPath, REPLACE_EXISTING);
+
+
+        generateResultFile(resultMap);
     }
     //Also set class attributes;
 
@@ -96,7 +132,7 @@ public class Generator {
             if(sheet.getRow(i).getCell(0).getStringCellValue().equals("return")) break;
             else numOfParams++;
         } // Params
-        System.out.println(numOfParams);
+        System.out.println("TestCases:"+numOfParams);
 
         for(int i = 0;i<numOfCases;i++) {
             String expectedValue = sheet.getRow(numOfParams + 1).getCell(i + 1).getStringCellValue();
@@ -137,10 +173,15 @@ public class Generator {
                 Result result = entry.getValue();
                 String actual = testCases[i].expected;
                 for(Failure failure: result.getFailures()){
-                    if(failure.getTestHeader().contains(testCases[i].name)){
-                        System.out.println("detected:"+failure+testCases[i].name);
-                        actual = failure.getMessage().replaceAll("expected:(.*)but was:","");
+                    try{
+                        if(failure.getTestHeader().contains(testCases[i].name)){
+                            System.out.println("detected:"+failure+"    "+testCases[i].name);
+                            actual = failure.getMessage().replaceAll("expected:(.*)but was:","");
+                        }
+                    }catch(Exception e){
+                        actual = "err";
                     }
+
                 }
                 output.createCell(1).setCellValue(actual);
             }
@@ -153,10 +194,54 @@ public class Generator {
 
     }
 
+    public Class recompile(String... str) throws Exception {
+        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null);
+        List<String> optionList = new ArrayList<String>();
+        optionList.add("-classpath");
+        optionList.add(System.getProperty("java.class.path"));
+        Iterable<? extends JavaFileObject> compilationUnit = fileManager.getJavaFileObjectsFromStrings(Arrays.asList(str));
+        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnostics, optionList, null, compilationUnit);
+        if(task.call()){
+//            Reloader classLoader = new Reloader();
+            Class<?> loadedClass = classLoader.loadClass("cn.edu.sjtu.software.CalRadius");
+            classLoader.loadClass("cn.edu.sjtu.software.Point");
+            Class<?> testClass = classLoader.loadClass("cn.edu.sjtu.software.GenTest");
 
-    public Result runTests() {
-        JUnitCore core = new JUnitCore();
-        Result r = core.run(GenTest.class);
+            Thread.currentThread().setContextClassLoader(classLoader);
+            return testClass;
+        }
+        return null;
+    }
+    static class Reloader extends ClassLoader {
+        @Override
+        public Class<?> loadClass(String name) throws ClassNotFoundException {
+            if (name.startsWith("cn.edu.sjtu.software.generator")) {
+                return getParent().loadClass(name);
+            }
+            else if (name.startsWith("cn.edu.sjtu.software")) {
+                try {
+                    InputStream is = Generator.class.getClassLoader().getResourceAsStream("cn/edu/sjtu/software/"+name.substring(21)+".class");
+                    byte[] buf = new byte[10000];
+                    int len = is.read(buf);
+                    return defineClass(name, buf, 0, len);
+                } catch (IOException e) {
+                    throw new ClassNotFoundException("", e);
+                }
+            }
+
+            return getParent().loadClass(name);
+        }
+    }
+
+
+    public Result runTests(Class clazz) throws Exception {
+        Class junitcore = classLoader.loadClass("org.junit.runner.JUnitCore");
+        JUnitCore core = (JUnitCore)junitcore.newInstance();
+        //        ClassLoader loader = Generator.class.getClassLoader();
+//        Class clazz = loader.loadClass("cn.edu.sjtu.software.GenTest");
+        Result r = core.run(clazz);
 //        Result r = null;
         return r;
     }
@@ -178,7 +263,9 @@ public class Generator {
         fw.write("package cn.edu.sjtu.software;\n\n");
         fw.write("import static org.junit.Assert.assertEquals;\n");
         fw.write("import org.junit.*;\n");
-
+        fw.write("import org.junit.runner.RunWith;");
+        fw.write("import cn.edu.sjtu.software.generator.ClasspathTestRunner;");
+        fw.write("@RunWith(ClasspathTestRunner.class)");
         // Class initialize
         fw.write("public class " + filename + "{\n");
 
