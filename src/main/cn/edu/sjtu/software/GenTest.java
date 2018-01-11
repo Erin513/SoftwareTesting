@@ -2,7 +2,7 @@ package cn.edu.sjtu.software;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.*;
-import org.junit.runner.RunWith;import cn.edu.sjtu.software.generator.ClasspathTestRunner;@RunWith(ClasspathTestRunner.class)public class GenTest{
+public class GenTest{
 private CalRadius calRadius= new CalRadius();
 @Test public void test1() throws Exception{
 assertEquals(true,calRadius.isCollinear(new Point(1,2),new Point(6,2),new Point(9,2)));
